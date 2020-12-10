@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +29,12 @@ class ReminderFragment : Fragment() {
     private val reminderAdapter =
         ReminderAdapter(reminders)
 
+    /** viewModels()
+     * Using this will let the Architecture Components initialize the ViewModel for us which also
+     * makes it able to be lifecycle aware
+     */
+    private val viewModel: ReminderViewModel by viewModels()
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -39,7 +47,7 @@ class ReminderFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initViews()
-        //observeAddReminderResult()
+        observeAddReminderResult()
 
     }
 
@@ -52,6 +60,15 @@ class ReminderFragment : Fragment() {
         rvReminders.addItemDecoration(DividerItemDecoration(context,DividerItemDecoration.VERTICAL))
 
         createItemTouchHelper().attachToRecyclerView(rvReminders)
+    }
+
+    private fun observeAddReminderResult(){
+        viewModel.reminders.observe(viewLifecycleOwner, Observer {
+                reminders ->
+            this.reminders.clear()
+            this.reminders.addAll(reminders)
+            reminderAdapter.notifyDataSetChanged()
+        })
     }
 
     private fun createItemTouchHelper(): ItemTouchHelper {
@@ -73,7 +90,7 @@ class ReminderFragment : Fragment() {
                 val position = viewHolder.adapterPosition
 
                 val reminderToDelete = reminders[position]
-                
+                viewModel.deleteReminder(reminderToDelete)
             }
         }
         
