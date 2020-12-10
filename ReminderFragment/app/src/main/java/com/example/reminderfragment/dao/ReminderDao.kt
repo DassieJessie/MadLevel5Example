@@ -1,5 +1,6 @@
 package com.example.reminderfragment.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.reminderfragment.model.Reminder
 
@@ -20,7 +21,8 @@ interface ReminderDao {
      * expensive to start and keep around
      */
     @Query("SELECT * FROM reminderTable") //retrieve all reminders from the database
-    suspend fun getAllReminders(): List<Reminder>
+    //livedata already runs in a background thread so we don't need coroutines (suspend)
+    fun getAllReminders(): LiveData<List<Reminder>>
 
     @Insert
     suspend fun insertReminder(reminder: Reminder)
